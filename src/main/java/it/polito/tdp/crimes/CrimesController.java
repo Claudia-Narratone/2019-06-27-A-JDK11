@@ -5,8 +5,10 @@
 package it.polito.tdp.crimes;
 
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.crimes.model.Adiacenza;
 import it.polito.tdp.crimes.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -25,10 +27,10 @@ public class CrimesController {
     private URL location;
 
     @FXML // fx:id="boxCategoria"
-    private ComboBox<?> boxCategoria; // Value injected by FXMLLoader
+    private ComboBox<String> boxCategoria; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxAnno"
-    private ComboBox<?> boxAnno; // Value injected by FXMLLoader
+    private ComboBox<Integer> boxAnno; // Value injected by FXMLLoader
 
     @FXML // fx:id="btnAnalisi"
     private Button btnAnalisi; // Value injected by FXMLLoader
@@ -45,7 +47,22 @@ public class CrimesController {
     @FXML
     void doCreaGrafo(ActionEvent event) {
     	txtResult.clear();
-    	txtResult.appendText("Crea grafo...\n");
+    	String categoria=boxCategoria.getValue();
+    	Integer anno=boxAnno.getValue();
+    	if(categoria==null) {
+    		txtResult.appendText("ERRORE: Devi scegliere una categoria");
+    		return;
+    	}
+    	if(anno==null) {
+    		txtResult.appendText("ERRORE: Devi scegliere un anno");
+    		return;
+    	}
+    	model.creaGrafo(categoria, anno);
+    	txtResult.appendText(String.format("Grafo creato con %d vertici e %d archi\n\n", model.nVertici(), model.nArchi()));
+    	txtResult.appendText("Archi con peso massimo:\n");
+    	for(Adiacenza a:model.getListPesoMax()) {
+    		txtResult.appendText(a.toString()+"\n");
+    	}
     }
 
     @FXML
@@ -62,10 +79,12 @@ public class CrimesController {
         assert boxArco != null : "fx:id=\"boxArco\" was not injected: check your FXML file 'Crimes.fxml'.";
         assert btnPercorso != null : "fx:id=\"btnPercorso\" was not injected: check your FXML file 'Crimes.fxml'.";
         assert txtResult != null : "fx:id=\"txtResult\" was not injected: check your FXML file 'Crimes.fxml'.";
-
+        
     }
     
     public void setModel(Model model) {
     	this.model = model;
+    	boxCategoria.getItems().addAll(model.getOffenseCategory());
+        boxAnno.getItems().addAll(model.getYears());
     }
 }
